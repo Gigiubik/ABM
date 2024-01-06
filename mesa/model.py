@@ -45,17 +45,6 @@ class Model:
         initialize_data_collector: Sets up the data collector for the model, requiring an initialized scheduler and agents.
     """
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
-        """Create a new model object and instantiate its RNG automatically."""
-        obj = object.__new__(cls)
-        obj._seed = kwargs.get("seed")
-        if obj._seed is None:
-            # We explicitly specify the seed here so that we know its value in
-            # advance.
-            obj._seed = random.random()  # noqa: S311
-        obj.random = random.Random(obj._seed)
-        return obj
-
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Create a new model. Overload this method with the actual code to
         start the model. Always start with super().__init__() to initialize the
@@ -65,6 +54,14 @@ class Model:
         self.running = True
         self.schedule = None
         self.current_id = 0
+
+        self._seed = kwargs.get("seed")
+        if self._seed is None:
+            # We explicitly specify the seed here so that we know its value in
+            # advance.
+            self._seed = random.random()  # noqa: S311
+        self.random = random.Random(self._seed)
+
         self._agents: defaultdict[type, dict] = defaultdict(dict)
 
         # Warning flags for current experimental features. These make sure a warning is only printed once per model.
