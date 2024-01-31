@@ -14,7 +14,6 @@ import warnings
 import weakref
 from collections import defaultdict
 from collections.abc import Iterable, Iterator, MutableSet, Sequence
-from random import Random
 
 # mypy
 from typing import TYPE_CHECKING, Any, Callable
@@ -24,6 +23,8 @@ if TYPE_CHECKING:
     # dependency.
     from mesa.model import Model
     from mesa.space import Position
+
+from mesa.rng import RandomDescriptor
 
 
 class Agent:
@@ -36,6 +37,8 @@ class Agent:
         self.pos: Position | None = None
     """
 
+    random = RandomDescriptor()
+
     def __init__(self, unique_id: int, model: Model) -> None:
         """
         Create a new agent.
@@ -47,6 +50,7 @@ class Agent:
         self.unique_id = unique_id
         self.model = model
         self.pos: Position | None = None
+        self.random = self.model.random
 
         # register agent
         try:
@@ -73,10 +77,6 @@ class Agent:
 
     def advance(self) -> None:
         pass
-
-    @property
-    def random(self) -> Random:
-        return self.model.random
 
 
 class AgentSet(MutableSet, Sequence):
@@ -106,8 +106,9 @@ class AgentSet(MutableSet, Sequence):
     """
 
     agentset_experimental_warning_given = False
+    random = RandomDescriptor()
 
-    def __init__(self, agents: Iterable[Agent], model: Model):
+    def __init__(self, agents: Iterable[Agent], model: Model, random=None):
         """
         Initializes the AgentSet with a collection of agents and a reference to the model.
 
@@ -116,6 +117,7 @@ class AgentSet(MutableSet, Sequence):
             model (Model): The ABM model instance to which this AgentSet belongs.
         """
         self.model = model
+        self.random = random
 
         if not self.__class__.agentset_experimental_warning_given:
             self.__class__.agentset_experimental_warning_given = True
@@ -348,15 +350,15 @@ class AgentSet(MutableSet, Sequence):
         self.model = state["model"]
         self._update(state["agents"])
 
-    @property
-    def random(self) -> Random:
-        """
-        Provide access to the model's random number generator.
-
-        Returns:
-            Random: The random number generator associated with the model.
-        """
-        return self.model.random
+    # @property
+    # def random(self) -> Random:
+    #     """
+    #     Provide access to the model's random number generator.
+    #
+    #     Returns:
+    #         Random: The random number generator associated with the model.
+    #     """
+    #     return self.model.random
 
 
 # consider adding for performance reasons

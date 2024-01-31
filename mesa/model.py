@@ -17,6 +17,7 @@ from typing import Any, Union
 
 from mesa.agent import Agent, AgentSet
 from mesa.datacollection import DataCollector
+from mesa.rng import get_default_rng, set_default_rng
 
 TimeT = Union[float, int]
 
@@ -56,7 +57,8 @@ class Model:
             # We explicitly specify the seed here so that we know its value in
             # advance.
             obj._seed = random.random()  # noqa: S311
-        obj.random = random.Random(obj._seed)
+        set_default_rng(obj._seed)
+        obj.random = get_default_rng()
         return obj
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
